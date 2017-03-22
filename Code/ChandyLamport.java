@@ -27,18 +27,18 @@ public class ChandyLamport {
 				mainObj.rec_marker.put(channelNo, true);
 				mainObj.is_blue = false;
 				mainObj.myState.active = mainObj.active;
-				mainObj.myState.curren_time_stamp = mainObj.curren_time_stamp;
+				mainObj.myState.current_time_stamp = mainObj.current_time_stamp;
 				mainObj.myState.nodeId = mainObj.id;
 				System.out.println("Node "+mainObj.id+" is sending the following timestamp to Node 0");
 //				for(ArrayList<ApplicationMsg> a:mainObj.in_transit_msgs.values()){
 					//System.out.println("******Checking if mainObj has empty channel state:"+a.isEmpty());
 //				}
-//				for(int k:mainObj.myState.curren_time_stamp){
+//				for(int k:mainObj.myState.current_time_stamp){
 //					System.out.print(k+" ");
 //				}
-				int[] vector_copy = new int[mainObj.myState.curren_time_stamp.length];
+				int[] vector_copy = new int[mainObj.myState.current_time_stamp.length];
 				for(int i=0;i<vector_copy.length;i++){
-					vector_copy[i] = mainObj.myState.curren_time_stamp[i]; 
+					vector_copy[i] = mainObj.myState.current_time_stamp[i]; 
 				}
 //				synchronized(mainObj.output){
 				mainObj.output.add(vector_copy);
