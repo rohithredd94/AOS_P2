@@ -29,20 +29,20 @@ public class ConfigParser {
 						String[] input = line.split("#.*$");
 						String[] input1 = input[0].split("\\s+");
 						if(flag == 0 && input1.length == 6){
-							mySystem.numOfNodes = Integer.parseInt(input1[0]);
-							mySystem.minPerActive = Integer.parseInt(input1[1]);
-							mySystem.maxPerActive = Integer.parseInt(input1[2]);
-							mySystem.minSendDelay = Integer.parseInt(input1[3]);
-							mySystem.snapshotDelay = Integer.parseInt(input1[4]);
-							mySystem.maxNumber = Integer.parseInt(input1[5]);
+							mySystem.num_of_nodes = Integer.parseInt(input1[0]);
+							mySystem.min_per_active = Integer.parseInt(input1[1]);
+							mySystem.max_per_active = Integer.parseInt(input1[2]);
+							mySystem.min_send_delay = Integer.parseInt(input1[3]);
+							mySystem.snapshot_delay = Integer.parseInt(input1[4]);
+							mySystem.max_number = Integer.parseInt(input1[5]);
 							flag++;
-							mySystem.adjMatrix = new int[mySystem.numOfNodes][mySystem.numOfNodes];
+							mySystem.adj_matrix = new int[mySystem.num_of_nodes][mySystem.num_of_nodes];
 						}
-						else if(flag == 1 && count < mySystem.numOfNodes)
+						else if(flag == 1 && count < mySystem.num_of_nodes)
 						{							
 							mySystem.nodes.add(new Node(Integer.parseInt(input1[0]),input1[1],Integer.parseInt(input1[2])));
 							count++;
-							if(count == mySystem.numOfNodes){
+							if(count == mySystem.num_of_nodes){
 								flag = 2;
 							}
 						}
@@ -54,20 +54,20 @@ public class ConfigParser {
 					else {
 						String[] input = line.split("\\s+");
 						if(flag == 0 && input.length == 6){
-							mySystem.numOfNodes = Integer.parseInt(input[0]);
-							mySystem.minPerActive = Integer.parseInt(input[1]);
-							mySystem.maxPerActive = Integer.parseInt(input[2]);
-							mySystem.minSendDelay = Integer.parseInt(input[3]);
-							mySystem.snapshotDelay = Integer.parseInt(input[4]);
-							mySystem.maxNumber = Integer.parseInt(input[5]);
+							mySystem.num_of_nodes = Integer.parseInt(input[0]);
+							mySystem.min_per_active = Integer.parseInt(input[1]);
+							mySystem.max_per_active = Integer.parseInt(input[2]);
+							mySystem.min_send_delay = Integer.parseInt(input[3]);
+							mySystem.snapshot_delay = Integer.parseInt(input[4]);
+							mySystem.max_number = Integer.parseInt(input[5]);
 							flag++;
-							mySystem.adjMatrix = new int[mySystem.numOfNodes][mySystem.numOfNodes];
+							mySystem.adj_matrix = new int[mySystem.num_of_nodes][mySystem.num_of_nodes];
 						}
-						else if(flag == 1 && count < mySystem.numOfNodes)
+						else if(flag == 1 && count < mySystem.num_of_nodes)
 						{
 							mySystem.nodes.add(new Node(Integer.parseInt(input[0]),input[1],Integer.parseInt(input[2])));
 							count++;
-							if(count == mySystem.numOfNodes){
+							if(count == mySystem.num_of_nodes){
 								flag = 2;
 							}
 						}
@@ -87,10 +87,10 @@ public class ConfigParser {
 		catch(IOException ex) {
 			System.out.println("Error reading file '" + fileName + "'");                  
 		}
-		for(int i=0;i<mySystem.numOfNodes;i++){
-			for(int j=0;j<mySystem.numOfNodes;j++){
-				if(mySystem.adjMatrix[i][j] == 1){
-					mySystem.adjMatrix[j][i] = 1;
+		for(int i=0;i<mySystem.num_of_nodes;i++){
+			for(int j=0;j<mySystem.num_of_nodes;j++){
+				if(mySystem.adj_matrix[i][j] == 1){
+					mySystem.adj_matrix[j][i] = 1;
 				}
 			}
 		}
@@ -99,15 +99,15 @@ public class ConfigParser {
 
 	static void insertIntoMatrix(String[] input, ProjectMain mySystem,int curNode) {
 		for(String i:input){
-			mySystem.adjMatrix[curNode][Integer.parseInt(i)] = 1;
+			mySystem.adj_matrix[curNode][Integer.parseInt(i)] = 1;
 		}
 	}
 
 //	public static void main(String[] args) throws IOException{
 //		ProjectMain m = ConfigParser.readConfigFile("config1.txt");
-//		for(int i=0;i<m.numOfNodes;i++){
-//			for(int j=0;j<m.numOfNodes;j++){
-//				System.out.print(m.adjMatrix[i][j]+"  ");
+//		for(int i=0;i<m.num_of_nodes;i++){
+//			for(int j=0;j<m.num_of_nodes;j++){
+//				System.out.print(m.adj_matrix[i][j]+"  ");
 //			}
 //			System.out.println();
 //		}
