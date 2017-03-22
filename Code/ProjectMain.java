@@ -39,7 +39,7 @@ public class ProjectMain implements Serializable  {
 	//Used to determine if state message has been received from all the processes in the system
 	boolean[] allnodes_state_msg;
 	//Every process stores its state(current_time_stamp,in_transit_msgs and its id) in this StateMsg Object
-	StateMsg myState;
+	StateMsg my_state;
 	//To hold output Snapshots
 	ArrayList<int[]> output = new ArrayList<int[]>();
 
@@ -60,8 +60,8 @@ public class ProjectMain implements Serializable  {
 			obj_main.rec_marker.put(e,false);
 		}
 		obj_main.allnodes_state_msg = new boolean[obj_main.num_of_nodes];
-		obj_main.myState = new StateMsg();
-		obj_main.myState.current_time_stamp = new int[obj_main.num_of_nodes];
+		obj_main.my_state = new StateMsg();
+		obj_main.my_state.current_time_stamp = new int[obj_main.num_of_nodes];
 	}
 
 

@@ -26,19 +26,19 @@ public class ChandyLamport {
 				System.out.println("Received first Marker message from node and color is blue, " + "will be changed to red  "+channel_num);
 				obj_main.rec_marker.put(channel_num, true);
 				obj_main.is_blue = false;
-				obj_main.myState.active = obj_main.active;
-				obj_main.myState.current_time_stamp = obj_main.current_time_stamp;
-				obj_main.myState.node_id = obj_main.id;
+				obj_main.my_state.active = obj_main.active;
+				obj_main.my_state.current_time_stamp = obj_main.current_time_stamp;
+				obj_main.my_state.node_id = obj_main.id;
 				System.out.println("Node "+obj_main.id+" is sending the following timestamp to Node 0");
 //				for(ArrayList<ApplicationMsg> a:obj_main.in_transit_msgs.values()){
 					//System.out.println("******Checking if obj_main has empty channel state:"+a.isEmpty());
 //				}
-//				for(int k:obj_main.myState.current_time_stamp){
+//				for(int k:obj_main.my_state.current_time_stamp){
 //					System.out.print(k+" ");
 //				}
-				int[] vector_copy = new int[obj_main.myState.current_time_stamp.length];
+				int[] vector_copy = new int[obj_main.my_state.current_time_stamp.length];
 				for(int i=0;i<vector_copy.length;i++){
-					vector_copy[i] = obj_main.myState.current_time_stamp[i]; 
+					vector_copy[i] = obj_main.my_state.current_time_stamp[i]; 
 				}
 //				synchronized(obj_main.output){
 				obj_main.output.add(vector_copy);
@@ -60,14 +60,14 @@ public class ChandyLamport {
 				}
 				if((obj_main.neighbors.length == 1) && (obj_main.id!=0)){
 					int parent = ConvergeCast.getParent(obj_main.id);	
-					obj_main.myState.in_transit_msgs = obj_main.in_transit_msgs;
+					obj_main.my_state.in_transit_msgs = obj_main.in_transit_msgs;
 					obj_main.is_blue = true;
 					obj_main.logging = 0;
 					// Send channel state to parent 
 					ObjectOutputStream oos = obj_main.output_stream.get(parent);
-					System.out.println("Sending State Msg  by  "+obj_main.id+" and process state is  "+obj_main.myState.active);
+					System.out.println("Sending State Msg  by  "+obj_main.id+" and process state is  "+obj_main.my_state.active);
 					try {
-						oos.writeObject(obj_main.myState);
+						oos.writeObject(obj_main.my_state);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -94,7 +94,7 @@ public class ChandyLamport {
 					int parent = ConvergeCast.getParent(obj_main.id);				
 					System.out.println("For node "+obj_main.id + ", all neighbours have sent marker messages.");
 					// Record the channelState and process State and which node is sending to node 0 as node_id
-					obj_main.myState.in_transit_msgs = obj_main.in_transit_msgs;
+					obj_main.my_state.in_transit_msgs = obj_main.in_transit_msgs;
 //					for(ArrayList<ApplicationMsg> a:obj_main.in_transit_msgs.values()){
 						//System.out.println("Checking if obj_main has empty channel state:"+a.isEmpty());
 //					}
@@ -102,9 +102,9 @@ public class ChandyLamport {
 					obj_main.logging = 0;
 					// Send channel state to parent 
 					ObjectOutputStream oos = obj_main.output_stream.get(parent);
-					System.out.println("Sending State Msg  by  "+obj_main.id+" and process state is  "+obj_main.myState.active);
+					System.out.println("Sending State Msg  by  "+obj_main.id+" and process state is  "+obj_main.my_state.active);
 					try {
-						oos.writeObject(obj_main.myState);
+						oos.writeObject(obj_main.my_state);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -112,8 +112,8 @@ public class ChandyLamport {
 				}
 				if(i == obj_main.neighbors.length &&  obj_main.id == 0){
 					System.out.println("For node 0, all neighbours have sent marker messages.");
-					obj_main.myState.in_transit_msgs = obj_main.in_transit_msgs;
-					obj_main.state_messages.put(obj_main.id, obj_main.myState);
+					obj_main.my_state.in_transit_msgs = obj_main.in_transit_msgs;
+					obj_main.state_messages.put(obj_main.id, obj_main.my_state);
 					obj_main.is_blue = true;
 					obj_main.logging = 0;
 				}
