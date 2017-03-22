@@ -281,7 +281,7 @@ class ClientThread extends Thread {
 							//System.out.println("state_messages size = "+obj_main.state_messages.size());
 							if(obj_main.state_messages.size() == obj_main.num_of_nodes) {
 								//System.out.println("State messages are received at node 0");
-								boolean restart_cl = ChandyLamport.processstate_messages(obj_main,((StateMsg)msg));
+								boolean restart_cl = ChandyLamport.processStateMessages(obj_main,((StateMsg)msg));
 								if(restart_cl) {
 									obj_main.initialize(obj_main);
 									new CLThread(obj_main).start();	
