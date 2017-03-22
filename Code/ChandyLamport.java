@@ -27,21 +27,21 @@ public class ChandyLamport {
 				mainObj.rec_marker.put(channelNo, true);
 				mainObj.is_blue = false;
 				mainObj.myState.active = mainObj.active;
-				mainObj.myState.vector = mainObj.vector;
+				mainObj.myState.curren_time_stamp = mainObj.curren_time_stamp;
 				mainObj.myState.nodeId = mainObj.id;
 				System.out.println("Node "+mainObj.id+" is sending the following timestamp to Node 0");
 //				for(ArrayList<ApplicationMsg> a:mainObj.in_transit_msgs.values()){
 					//System.out.println("******Checking if mainObj has empty channel state:"+a.isEmpty());
 //				}
-//				for(int k:mainObj.myState.vector){
+//				for(int k:mainObj.myState.curren_time_stamp){
 //					System.out.print(k+" ");
 //				}
-				int[] vectorCopy = new int[mainObj.myState.vector.length];
-				for(int i=0;i<vectorCopy.length;i++){
-					vectorCopy[i] = mainObj.myState.vector[i]; 
+				int[] vector_copy = new int[mainObj.myState.curren_time_stamp.length];
+				for(int i=0;i<vector_copy.length;i++){
+					vector_copy[i] = mainObj.myState.curren_time_stamp[i]; 
 				}
 //				synchronized(mainObj.output){
-				mainObj.output.add(vectorCopy);
+				mainObj.output.add(vector_copy);
 //				}
 //				new writeToOutputThread(mainObj).start();
 				//logging = 1 demands the process to log application messages after it has become red
@@ -268,7 +268,7 @@ class OutputWriter {
 				bufferedWriter.close();
 			}
 			catch(IOException ex) {
-				stem.out.println("Error writing to file '" + fileName + "'");
+				System.out.println("Error writing to file '" + fileName + "'");
 				// Or we could just do this: ex.printStackTrace();
 			}
 		}
