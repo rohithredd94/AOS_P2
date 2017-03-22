@@ -16,7 +16,7 @@
 #
 PROG=ProjectMain
 NETID=$2
-PROGRAM_PATH=/home/011/p/px/pxv162030/Projects/AOS/Classfiles
+PROGRAM_PATH=/home/013/r/rx/rxk152130/AOS_P2_1
 
 #rm *.class *.out
 #javac *.java

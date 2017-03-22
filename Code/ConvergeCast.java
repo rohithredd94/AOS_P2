@@ -21,7 +21,7 @@ public class ConvergeCast {
 	}
 	
 	static //Function that implements bfs to build spanning tree
-	void buildSpanningTree(int[][] adjMatrix){
+	void build_tree(int[][] adjMatrix){
 		boolean[] visited = new boolean[adjMatrix.length];
 		parent = new int[adjMatrix.length];
 		Queue<QNode> queue = new LinkedList<QNode>();
@@ -44,7 +44,7 @@ public class ConvergeCast {
 
 //	public static void main(String[] args){
 //		int[][] adjMatrix ={ { 0,0,0,0,1},{1,0,0,0,0},{0,0,0,1,0},{0,1,0,0,0},{0,0,1,0,0}};
-//		buildSpanningTree(adjMatrix);
+//		build_tree(adjMatrix);
 //		for(int i=0;i<adjMatrix.length;i++)
 //		System.out.println("Node  "+i+" Parent is "+getParent(i));
 //	}

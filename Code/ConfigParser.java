@@ -9,7 +9,7 @@ public class ConfigParser {
 		ProjectMain mySystem = new ProjectMain();
 		int count = 0,flag = 0;
 		// Variable to keep track of the current node whose neighbors are being updated
-		int curNode = 0;
+		int current_node = 0;
 		// The name of the file to open.
 		String curDir = System.getProperty("user.dir");
 		String fileName = curDir+"/"+name;
@@ -47,8 +47,8 @@ public class ConfigParser {
 							}
 						}
 						else if(flag == 2){
-							insertIntoMatrix(input1,mySystem, curNode);
-							curNode++;
+							insertIntoMatrix(input1,mySystem, current_node);
+							current_node++;
 						}
 					}
 					else {
@@ -72,8 +72,8 @@ public class ConfigParser {
 							}
 						}
 						else if(flag == 2){
-							insertIntoMatrix(input,mySystem,curNode);
-							curNode++;
+							insertIntoMatrix(input,mySystem,current_node);
+							current_node++;
 						}
 					}
 				}
@@ -97,9 +97,9 @@ public class ConfigParser {
 		return mySystem;
 	}
 
-	static void insertIntoMatrix(String[] input, ProjectMain mySystem,int curNode) {
+	static void insertIntoMatrix(String[] input, ProjectMain mySystem,int current_node) {
 		for(String i:input){
-			mySystem.adj_matrix[curNode][Integer.parseInt(i)] = 1;
+			mySystem.adj_matrix[current_node][Integer.parseInt(i)] = 1;
 		}
 	}
 
