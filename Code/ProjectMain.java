@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.Set;
+import java.util.LinkedList;
+import java.util.Queue;
 
 @SuppressWarnings("serial")
 public class ProjectMain implements Serializable  {
@@ -23,6 +25,7 @@ public class ProjectMain implements Serializable  {
 	boolean is_blue = true;
 	int logging = 0;
 	boolean is_first_time = true;
+	int parent;
 	//ArrayLintst which holds the nodes part of the distributed system 
 	ArrayList<Node> nodes = new ArrayList<Node>();
 	//HashMap which has node number as keys and <id,host,port> as value
@@ -44,26 +47,52 @@ public class ProjectMain implements Serializable  {
 	ArrayList<int[]> output = new ArrayList<int[]>();
 
 	//Re-initialize everything that is needed for Chandy Lamport protocol before restarting it
-	void initialize(ProjectMain obj_main){
-		obj_main.in_transit_msgs = new HashMap<Integer,ArrayList<ApplicationMsg>>();
-		obj_main.rec_marker = new HashMap<Integer,Boolean>();
-		obj_main.state_messages = new HashMap<Integer,StateMsg>();	
+	public void initialize(){
+		this.in_transit_msgs = new HashMap<Integer,ArrayList<ApplicationMsg>>();
+		this.rec_marker = new HashMap<Integer,Boolean>();
+		this.state_messages = new HashMap<Integer,StateMsg>();	
 
-		Set<Integer> keys = obj_main.channels.keySet();
 		//Initialize in_transit_msgs hashMap
-		for(Integer element : keys){
-			ArrayList<ApplicationMsg> arrList = new ArrayList<ApplicationMsg>();
-			obj_main.in_transit_msgs.put(element, arrList);
-		}
+		for(Integer element : this.channels.keySet())
+			this.in_transit_msgs.put(element, new ArrayList<ApplicationMsg>());
 		//Initialize boolean hashmap rec_marker to false
-		for(Integer e: obj_main.neighbors){
-			obj_main.rec_marker.put(e,false);
-		}
-		obj_main.allnodes_state_msg = new boolean[obj_main.num_of_nodes];
-		obj_main.my_state = new StateMsg();
-		obj_main.my_state.current_time_stamp = new int[obj_main.num_of_nodes];
+		for(Integer e: this.neighbors)
+			this.rec_marker.put(e,false);
+
+		this.allnodes_state_msg = new boolean[this.num_of_nodes];
+		this.my_state = new StateMsg();
+		this.my_state.current_time_stamp = new int[this.num_of_nodes];
 	}
 
+	public void buildTree(int[][] matrix) {
+		boolean[] visited = new boolean[matrix.length];
+		Queue<QNode> queue = new LinkedList<QNode>();
+		queue.add(new QNode(0,0));
+		//If its already visited then no need to visit again since its done in bfs tree , nodes 
+		//visited at first level will have direct parents and so on
+		visited[0] = true;
+		while(!queue.isEmpty()){
+			QNode u = queue.remove();
+			for(int i=0;i<matrix[u.node].length;i++){
+				if(matrix[u.node][i] == 1 && visited[i] == false){
+					queue.add(new QNode(i,u.level+1));
+					if(this.id == i)
+						this.parent = u.node;
+					visited[i] = true;
+				}
+			}
+		}
+	}
+
+	class QNode{
+		int node;
+		int level;
+		
+		public QNode(int i, int j) {
+			this.node = i;
+			this.level = j;
+		}
+	}
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		//Read the values for all variables from the configuration file
@@ -75,7 +104,7 @@ public class ProjectMain implements Serializable  {
 		//String config_name = args[1];
 		ProjectMain.output_file_name = args[1].substring(0, args[1].lastIndexOf('.'));
 		//Build converge cast spanning tree in the beginning
-		ConvergeCast.build_tree(obj_main.adj_matrix);
+		obj_main.buildTree(obj_main.adj_matrix);
 		// Transfer the collection of nodes from ArrayList to hash map which has node id as key since  
 		// we need to get and node as value ,it returns <id,host,port> when queried with node Id.
 		HashMap<Integer, Node> node_address_list = new HashMap<Integer, Node>();
@@ -104,20 +133,21 @@ public class ProjectMain implements Serializable  {
 		Set<Integer> keys = obj_main.channels.keySet();
 		obj_main.neighbors = new int[keys.size()];
 		int index = 0;
-		for(Integer element : keys) obj_main.neighbors[index++] = element.intValue();
+		for(Integer element : keys)
+			obj_main.neighbors[index++] = element.intValue();
 		//obj_main.current_time_stamp is used to maintain the current timestamp of the process
 		obj_main.current_time_stamp = new int[obj_main.num_of_nodes];
 
 		//Initialize all the datastructures needed for the node to run the protocols
-		obj_main.initialize(obj_main);
+		obj_main.initialize();
 
 		//Initially node 0 is active therefore if this node is 0 then it should be active
 		if(current_node == 0){
 			obj_main.active = true;
 			System.out.println("Emitted Messages");			
 			//Start Chandy Lamport protocol if it is node 0
-			new CLThread(obj_main).start();		
-			new EmitMessagesThread(obj_main).start();
+			new CLThread(obj_main).start();
+			new MAPThread(obj_main).start();
 		}
 		try {
 			while (true) {
@@ -133,57 +163,53 @@ public class ProjectMain implements Serializable  {
 	}
 
 
-	void emitMessages() throws InterruptedException{
+	public void startMAPProtocol() throws InterruptedException {
 
 		// get a random number between min_per_active to max_per_active to emit that many messages
 		int num_of_msgs = 1;
-		int min_send_delay = 0;
-		synchronized(this){
-			num_of_msgs = this.getRandomNumber(this.min_per_active,this.max_per_active);
-			// If random number is 0 then since node 0 is the only process active in the beginning it will not start
-			// therefore get a bigger random number
-			if(num_of_msgs == 0){
-				num_of_msgs = this.getRandomNumber(this.min_per_active + 1,this.max_per_active);
-			}
-			min_send_delay = this.min_send_delay;
-		}
+		num_of_msgs = this.getRandomNumber(this.min_per_active,this.max_per_active);
+		// If random number is 0 then since node 0 is the only process active in the beginning it will not start
+		// therefore get a bigger random number
+		if(num_of_msgs == 0)
+			num_of_msgs = this.getRandomNumber(this.min_per_active + 1,this.max_per_active);
+
 		//System.out.println("For Node "+this.id+ "  Random number of messages in range min - max per active is  "+num_of_msgs);
 		// channels hashMap has all neighbors as keys, store them in an array to get random neighbor
 		for(int i=0;i<num_of_msgs;i++) {
-			synchronized(this){
+			synchronized(this) {
 				//get a random number to index in the neighbors and array and get that neighbor
 				int neighbor_index = this.getRandomNumber(0,this.neighbors.length-1);
 				int current_neighbor = this.neighbors[neighbor_index];
 //				System.out.println("Neighbor chosen is "+current_neighbor);
 				if(this.active == true){
 					//send application message
-					ApplicationMsg m = new ApplicationMsg(); 
+					ApplicationMsg app_msg = new ApplicationMsg(); 
 					// Code for current_time_stamp protocol
 					this.current_time_stamp[this.id]++;
-					m.current_time_stamp = new int[this.current_time_stamp.length];
-					System.arraycopy( this.current_time_stamp, 0, m.current_time_stamp, 0, this.current_time_stamp.length );
-					m.node_id = this.id;
+					app_msg.current_time_stamp = new int[this.current_time_stamp.length];
+					System.arraycopy(this.current_time_stamp, 0, app_msg.current_time_stamp, 0, this.current_time_stamp.length);
+					app_msg.node_id = this.id;
 					//					System.out.println("Timestamp that is being sent while message is emitted ");
-					//					for(int s:m.current_time_stamp){
+					//					for(int s:app_msg.current_time_stamp){
 					//						System.out.println(s+" ");
 					//					}
 					// Write the message in the channel connecting to neighbor
 					try {
 						ObjectOutputStream oos = this.output_stream.get(current_neighbor);
-						oos.writeObject(m);	
+						oos.writeObject(app_msg);	
 						oos.flush();
 					} catch (IOException e) {
 						e.printStackTrace();
-					}	
+					}
 					//increment total_messages_sent
-					total_messages_sent++;
+					this.total_messages_sent++;
 				}
 			}
 			// Wait for minimum sending delay before sending another message
 			try {
-				Thread.sleep(min_send_delay);
+				Thread.sleep(this.min_send_delay);
 			} catch (InterruptedException e) {
-				System.out.println("Error in EmitMessages");
+				System.out.println("Error in MAP protocol");
 			}
 		}
 		synchronized(this){
@@ -194,20 +220,16 @@ public class ProjectMain implements Serializable  {
 	}
 
 	// Function to generate random number in a given range
-	int getRandomNumber(int min,int max){
-		// Usually this can be a field rather than a method variable
-		Random rand = new Random();
-		// nextInt is normally exclusive of the top value,
-		// so add 1 to make it inclusive
-		int random_number = rand.nextInt((max - min) + 1) + min;
-		return random_number;
+	int getRandomNumber(int min,int max) {
+		return new Random().nextInt((max - min) + 1) + min;
 	}
 }
 
 //Server reading objects sent by other clients in the system in a thread 
 class ClientThread extends Thread {
-	Socket client_socket;
+
 	ProjectMain obj_main;
+	Socket client_socket;
 
 	public ClientThread(Socket client_socket,ProjectMain obj_main) {
 		this.client_socket = client_socket;
@@ -218,10 +240,10 @@ class ClientThread extends Thread {
 		ObjectInputStream ois = null;
 		try {
 			ois = new ObjectInputStream(client_socket.getInputStream());
-		} catch (IOException e1) {
-			e1.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		while(true){
+		while(true) {
 			try {
 				Message msg;
 				msg = (Message) ois.readObject();
@@ -237,13 +259,12 @@ class ClientThread extends Thread {
 
 					//A passive process on receiving an application message only becomes active if 
 					//it has sent fewer than max_number messages
-					else if((obj_main.active == false) && msg instanceof ApplicationMsg && 
-							obj_main.total_messages_sent < obj_main.max_number && obj_main.logging == 0){
+					else if((obj_main.active == false) && msg instanceof ApplicationMsg && obj_main.total_messages_sent < obj_main.max_number && obj_main.logging == 0) {
 						obj_main.active = true; 
-						new EmitMessagesThread(obj_main).start();
+						new MAPThread(obj_main).start();
 					}
 					//If its an application message and logging = 1 then save it
-					else if((obj_main.active == false) && (msg instanceof ApplicationMsg) && (obj_main.logging == 1)){
+					else if((obj_main.active == false) && (msg instanceof ApplicationMsg) && (obj_main.logging == 1)) {
 						//Save the channel No from where the message came from
 						int channel_num = ((ApplicationMsg) msg).node_id;
 						//Log the application message since logging is enabled
@@ -252,22 +273,17 @@ class ClientThread extends Thread {
 
 					//If message is a state message then if this node id is 0 then process it 
 					// otherwise forward it to the parent on converge cast tree towards Node 0
-					else if(msg instanceof StateMsg){
-						if(obj_main.id == 0){
+					else if(msg instanceof StateMsg) {
+						if(obj_main.id == 0) {
 							//System.out.println("Received State msg at Node 0 from node "+((StateMsg)msg).node_id);
 							obj_main.state_messages.put(((StateMsg)msg).node_id,((StateMsg)msg));
 							obj_main.allnodes_state_msg[((StateMsg) msg).node_id] = true;
 							//System.out.println("state_messages size = "+obj_main.state_messages.size());
-							if(obj_main.state_messages.size() == obj_main.num_of_nodes){
+							if(obj_main.state_messages.size() == obj_main.num_of_nodes) {
 								//System.out.println("State messages are received at node 0");
-								boolean restart_CL = ChandyLamport.processstate_messages(obj_main,((StateMsg)msg));
-								if(restart_CL){
-									//System.out.println("Restarting Chandy Lamport Protocol");
+								boolean restart_cl = ChandyLamport.processstate_messages(obj_main,((StateMsg)msg));
+								if(restart_cl) {
 									obj_main.initialize(obj_main);
-									//									for(ArrayList<ApplicationMsg> a:obj_main.in_transit_msgs.values()){
-									//										System.out.println("Checking if obj_main has empty channel state:"+a.isEmpty());
-									//									}
-									//Call Chandy Lamport protocol 
 									new CLThread(obj_main).start();	
 								}								
 							}
@@ -278,30 +294,18 @@ class ClientThread extends Thread {
 						}
 					}
 					//If a finishMsg is received then forward the message to all its neighbors
-					else if(msg instanceof FinishMsg){	
-						//System.out.println("Finish Message of Node "+obj_main.id+" finish message is"+((FinishMsg)msg).msg);
+					else if(msg instanceof FinishMsg) {
 						ChandyLamport.sendFinishMsg(obj_main);
 					}
 
-					if(msg instanceof ApplicationMsg){
-						//						System.out.println("TimeStamp when application message is received and not processed at node "+obj_main.id);
-						//						for(int j: ((ApplicationMsg) msg).current_time_stamp){
-						//							System.out.println(j+" ");
-						//						}
+					if(msg instanceof ApplicationMsg) {
 						//Code for current_time_stamp protocol
-						for(int i=0;i<obj_main.num_of_nodes;i++){
+						for(int i=0;i<obj_main.num_of_nodes;i++)
 							obj_main.current_time_stamp[i] = Math.max(obj_main.current_time_stamp[i], ((ApplicationMsg) msg).current_time_stamp[i]);
-						}
 						obj_main.current_time_stamp[obj_main.id]++;
-						// print the current_time_stamp 
-						//						System.out.println("current_time_stamp of node id "+obj_main.id+" when appln msg is received and processed");
-						//						for(int i:obj_main.current_time_stamp){
-						//							System.out.println(i);
-						//						}
 					}
 				}
-			}
-			catch (IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
@@ -313,23 +317,24 @@ class ClientThread extends Thread {
 }
 
 //Thread to start chandy lamport protocol
-class CLThread extends Thread{
+class CLThread extends Thread {
 
 	ProjectMain obj_main;
-	public CLThread(ProjectMain obj_main){
+
+	public CLThread(ProjectMain obj_main) {
 		this.obj_main = obj_main;
 	}
+
 	public void run(){
 		//If its the first time calling chandy Lamport protocol, start immediately
-		if(obj_main.is_first_time){
+		if(obj_main.is_first_time) {
 			obj_main.is_first_time = false;
 		}
 		//If its not first time , start after the snapShot delay
-		else{
+		else {
 			try {
 				Thread.sleep(obj_main.snapshot_delay);
 			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -338,18 +343,19 @@ class CLThread extends Thread{
 	}
 }
 
-//Thread to start chandy lamport protocol
-class EmitMessagesThread extends Thread{
+//Thread to start MAP protocol
+class MAPThread extends Thread {
 
 	ProjectMain obj_main;
-	public EmitMessagesThread(ProjectMain obj_main){
+
+	public MAPThread(ProjectMain obj_main) {
 		this.obj_main = obj_main;
 	}
-	public void run(){
+
+	public void run() {
 		try {
-			obj_main.emitMessages();
+			obj_main.startMAPProtocol();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}

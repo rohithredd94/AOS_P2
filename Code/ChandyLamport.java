@@ -36,24 +36,20 @@ public class ChandyLamport {
 //				for(int k:obj_main.my_state.current_time_stamp){
 //					System.out.print(k+" ");
 //				}
-				int[] vector_copy = new int[obj_main.my_state.current_time_stamp.length];
-				for(int i=0;i<vector_copy.length;i++){
-					vector_copy[i] = obj_main.my_state.current_time_stamp[i]; 
-				}
 //				synchronized(obj_main.output){
-				obj_main.output.add(vector_copy);
+				obj_main.output.add(obj_main.my_state.current_time_stamp);
 //				}
 //				new writeToOutputThread(obj_main).start();
 				//logging = 1 demands the process to log application messages after it has become red
 				obj_main.logging = 1;
 				//Send marker messages to all its neighbors
-				for(int i : obj_main.neighbors){
-					MarkerMsg m = new MarkerMsg();
+				for(int i : obj_main.neighbors) {
+					MarkerMsg marker_msg = new MarkerMsg();
 					System.out.println("To Node "+i+" process "+obj_main.id+"  is sending marker messages now");
-					m.node_id = obj_main.id;
+					marker_msg.node_id = obj_main.id;
 					ObjectOutputStream oos = obj_main.output_stream.get(i);
 					try {
-						oos.writeObject(m);
+						oos.writeObject(marker_msg);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
@@ -198,9 +194,8 @@ public class ChandyLamport {
 	// therefore simply forward it over converge cast tree towards Node 0
 	public static void forwardToParent(ProjectMain obj_main, StateMsg stateMsg) {
 		synchronized(obj_main){
-			int parent = ConvergeCast.getParent(obj_main.id);
 			// Send stateMsg to the parent
-			ObjectOutputStream oos = obj_main.output_stream.get(parent);
+			ObjectOutputStream oos = obj_main.output_stream.get(obj_main.parent);
 			try {
 				oos.writeObject(stateMsg);
 			} catch (IOException e) {
