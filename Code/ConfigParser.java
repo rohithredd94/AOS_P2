@@ -8,22 +8,22 @@ public class ConfigParser {
 	public static NodeServer readConfigFile(String name) throws IOException{
 		NodeServer mySystem = new NodeServer();
 		int count = 0,flag = 0;
-		// Variable to keep track of the current node whose neighbors are being updated
+		//Variable to keep track of the current node whose neighbors are being updated
 		int current_node = 0;
-		// The name of the file to open.
+		//The name of the file to open.
 		String curDir = System.getProperty("user.dir");
 		String fileName = curDir+"/"+name;
-		// This will reference one line at a time
+		//This will reference one line at a time
 		String line = null;
 		try {
-			// FileReader reads text files in the default encoding.
+			//FileReader reads text files in the default encoding.
 			FileReader fileReader = new FileReader(fileName);
-			// Always wrap FileReader in BufferedReader.
+			//Always wrap FileReader in BufferedReader.
 			BufferedReader bufferedReader = new BufferedReader(fileReader);
 			while((line = bufferedReader.readLine()) != null) {
 				if(line.length() == 0)
 					continue;
-				// Ignore comments and consider only those lines which are not comments
+				//Ignore comments and consider only those lines which are not comments
 				if(!line.startsWith("#")){
 					if(line.contains("#")){
 						String[] input = line.split("#.*$");
@@ -78,7 +78,7 @@ public class ConfigParser {
 					}
 				}
 			}
-			// Always close files.
+			//Always close files.
 			bufferedReader.close();  
 		}
 		catch(FileNotFoundException ex) {
@@ -102,16 +102,5 @@ public class ConfigParser {
 			mySystem.adj_matrix[current_node][Integer.parseInt(i)] = 1;
 		}
 	}
-
-//	public static void main(String[] args) throws IOException{
-//		NodeServer m = ConfigParser.readConfigFile("config1.txt");
-//		for(int i=0;i<m.num_of_nodes;i++){
-//			for(int j=0;j<m.num_of_nodes;j++){
-//				System.out.print(m.adj_matrix[i][j]+"  ");
-//			}
-//			System.out.println();
-//		}
-//
-//	}
 }
 

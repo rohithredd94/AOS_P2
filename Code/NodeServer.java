@@ -29,15 +29,15 @@ public class NodeServer implements Serializable  {
 	//ArrayLintst which holds the nodes part of the distributed system 
 	ArrayList<Node> nodes = new ArrayList<Node>();
 	//HashMap which has node number as keys and <id,host,port> as value
-	// Create all the channels in the beginning and keep it open till the end
+	//Create all the channels in the beginning and keep it open till the end
 	HashMap<Integer,Socket> channels = new HashMap<Integer,Socket>();
-	// Create all the output streams associated with each socket 
+	//Create all the output streams associated with each socket 
 	HashMap<Integer,ObjectOutputStream> output_stream = new HashMap<Integer,ObjectOutputStream>();
-	// HashMap which stores ArrayList of messages recorded while the process is red for each channel
+	//HashMap which stores ArrayList of messages recorded while the process is red for each channel
 	HashMap<Integer,ArrayList<ApplicationMsg>> in_transit_msgs;
-	// HashMap which stores all incoming channels and boolean received marker message
+	//HashMap which stores all incoming channels and boolean received marker message
 	HashMap<Integer,Boolean> rec_marker;
-	// HashMap which stores all state messages
+	//HashMap which stores all state messages
 	HashMap<Integer,StateMsg> state_messages;	
 	//Used to determine if state message has been received from all the processes in the system
 	boolean[] allnodes_state_msg;
@@ -58,7 +58,6 @@ public class NodeServer implements Serializable  {
 		//Initialize boolean hashmap rec_marker to false
 		for(Integer e: this.neighbors)
 			this.rec_marker.put(e,false);
-
 		this.allnodes_state_msg = new boolean[this.num_of_nodes];
 		this.my_state = new StateMsg();
 		this.my_state.current_time_stamp = new int[this.num_of_nodes];
@@ -68,8 +67,7 @@ public class NodeServer implements Serializable  {
 		boolean[] visited = new boolean[matrix.length];
 		Queue<QNode> queue = new LinkedList<QNode>();
 		queue.add(new QNode(0,0));
-		//If its already visited then no need to visit again since its done in bfs tree , nodes 
-		//visited at first level will have direct parents and so on
+		//If its already visited then no need to visit again since its done in bfs tree , nodes visited at first level will have direct parents and so on
 		visited[0] = true;
 		while(!queue.isEmpty()){
 			QNode u = queue.remove();
@@ -101,19 +99,17 @@ public class NodeServer implements Serializable  {
 		obj_main.id = Integer.parseInt(args[0]);
 		int current_node = obj_main.id;
 		//Get the configuration file from command line
-		//String config_name = args[1];
 		NodeServer.output_file_name = args[1].substring(0, args[1].lastIndexOf('.'));
 		//Build converge cast spanning tree in the beginning
 		obj_main.buildTree(obj_main.adj_matrix);
-		// Transfer the collection of nodes from ArrayList to hash map which has node id as key since  
-		// we need to get and node as value ,it returns <id,host,port> when queried with node Id.
+		//Transfer the collection of nodes to hash map which has node id as key since we need to get and node as value ,it returns <id,host,port> when queried with node Id.
 		HashMap<Integer, Node> node_address_list = new HashMap<Integer, Node>();
 		for(int i=0;i<obj_main.nodes.size();i++){
 			node_address_list.put(obj_main.nodes.get(i).node_id, obj_main.nodes.get(i));
 		}
-		// Get the port number on which this node should listen 
+		//Get the port number on which this node should listen 
 		int server_port = obj_main.nodes.get(obj_main.id).port;
-		// Start server on this node's assigned port
+		//Start server on this node's assigned port
 		ServerSocket server_listener = new ServerSocket(server_port);
 		Thread.sleep(10000);
 		//Create channels and keep it till the end
@@ -165,22 +161,18 @@ public class NodeServer implements Serializable  {
 
 	public void startMAPProtocol() throws InterruptedException {
 
-		// get a random number between min_per_active to max_per_active to emit that many messages
+		//Get a random number between min_per_active to max_per_active to emit that many messages
 		int num_of_msgs = 1;
 		num_of_msgs = this.getRandomNumber(this.min_per_active,this.max_per_active);
-		// If random number is 0 then since node 0 is the only process active in the beginning it will not start
-		// therefore get a bigger random number
+		//If random number is 0 then since node 0 is the only process active in the beginning it will not start therefore get a bigger random number
 		if(num_of_msgs == 0)
 			num_of_msgs = this.getRandomNumber(this.min_per_active + 1,this.max_per_active);
-
-		//System.out.println("For Node "+this.id+ "  Random number of messages in range min - max per active is  "+num_of_msgs);
-		// channels hashMap has all neighbors as keys, store them in an array to get random neighbor
+		//Channels hashMap has all neighbors as keys, store them in an array to get random neighbor
 		for(int i=0;i<num_of_msgs;i++) {
 			synchronized(this) {
-				//get a random number to index in the neighbors and array and get that neighbor
+				//Get a random number to index in the neighbors and array and get that neighbor
 				int neighbor_index = this.getRandomNumber(0,this.neighbors.length-1);
 				int current_neighbor = this.neighbors[neighbor_index];
-//				System.out.println("Neighbor chosen is "+current_neighbor);
 				if(this.active == true){
 					//send application message
 					ApplicationMsg app_msg = new ApplicationMsg(); 
@@ -189,10 +181,6 @@ public class NodeServer implements Serializable  {
 					app_msg.current_time_stamp = new int[this.current_time_stamp.length];
 					System.arraycopy(this.current_time_stamp, 0, app_msg.current_time_stamp, 0, this.current_time_stamp.length);
 					app_msg.node_id = this.id;
-					//					System.out.println("Timestamp that is being sent while message is emitted ");
-					//					for(int s:app_msg.current_time_stamp){
-					//						System.out.println(s+" ");
-					//					}
 					// Write the message in the channel connecting to neighbor
 					try {
 						ObjectOutputStream oos = this.output_stream.get(current_neighbor);
@@ -201,11 +189,11 @@ public class NodeServer implements Serializable  {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					//increment total_messages_sent
+					//Increment total_messages_sent
 					this.total_messages_sent++;
 				}
 			}
-			// Wait for minimum sending delay before sending another message
+			//Wait for minimum sending delay before sending another message
 			try {
 				Thread.sleep(this.min_send_delay);
 			} catch (InterruptedException e) {
@@ -213,13 +201,13 @@ public class NodeServer implements Serializable  {
 			}
 		}
 		synchronized(this){
-			// After sending min_per_active to max_per_active number of messages become passive
+			//After sending min_per_active to max_per_active number of messages become passive
 			this.active = false;
 		}
 
 	}
 
-	// Function to generate random number in a given range
+	//Function to generate random number in a given range
 	int getRandomNumber(int min,int max) {
 		return new Random().nextInt((max - min) + 1) + min;
 	}
@@ -247,18 +235,16 @@ class ClientThread extends Thread {
 			try {
 				Message msg;
 				msg = (Message) ois.readObject();
-				// Synchronizing obj_main so that multiple threads access obj_main in a synchronized way
+				//Synchronizing obj_main so that multiple threads access obj_main in a synchronized way
 				synchronized(obj_main){
 
-					//If message is a marker message then process has to turn red if its blue and send messages along all its
-					//channels
+					//If message is a marker message then process has to turn red if its blue and send messages along all its channels
 					if(msg instanceof MarkerMsg){
 						int channel_num = ((MarkerMsg) msg).node_id;
 						ChandyLamport.sendMarkerMessage(obj_main,channel_num);
 					}	
 
-					//A passive process on receiving an application message only becomes active if 
-					//it has sent fewer than max_number messages
+					//A passive process on receiving an application message only becomes active if it has sent fewer than max_number messages
 					else if((obj_main.active == false) && msg instanceof ApplicationMsg && obj_main.total_messages_sent < obj_main.max_number && obj_main.logging == 0) {
 						obj_main.active = true; 
 						new MAPThread(obj_main).start();
@@ -271,16 +257,13 @@ class ClientThread extends Thread {
 						ChandyLamport.logMessage(channel_num,((ApplicationMsg) msg) ,obj_main);
 					}
 
-					//If message is a state message then if this node id is 0 then process it 
-					// otherwise forward it to the parent on converge cast tree towards Node 0
+					//If message is a state message then if this node id is 0 then process it otherwise forward it to the parent on converge cast tree towards Node 0
 					else if(msg instanceof StateMsg) {
 						if(obj_main.id == 0) {
-							//System.out.println("Received State msg at Node 0 from node "+((StateMsg)msg).node_id);
 							obj_main.state_messages.put(((StateMsg)msg).node_id,((StateMsg)msg));
 							obj_main.allnodes_state_msg[((StateMsg) msg).node_id] = true;
-							//System.out.println("state_messages size = "+obj_main.state_messages.size());
 							if(obj_main.state_messages.size() == obj_main.num_of_nodes) {
-								//System.out.println("State messages are received at node 0");
+								System.out.println("State messages are received at node 0");
 								boolean restart_cl = ChandyLamport.processStateMessages(obj_main,((StateMsg)msg));
 								if(restart_cl) {
 									obj_main.initialize();
@@ -289,7 +272,6 @@ class ClientThread extends Thread {
 							}
 						}
 						else{
-							//System.out.println("Forwarding state msg to my parent - node"+obj_main.id);
 							ChandyLamport.forwardToParent(obj_main,((StateMsg)msg));
 						}
 					}
