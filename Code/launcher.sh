@@ -14,9 +14,9 @@
 #
 # Your main project class
 #
-PROG=ProjectMain
+PROG=NodeServer
 NETID=$2
-PROGRAM_PATH=/home/013/r/rx/rxk152130/AOS_P2_1
+PROGRAM_PATH=/home/011/p/px/pxv162030/Projects/AOS/Project2/ClassFiles
 
 #rm *.class *.out
 #javac *.java
@@ -28,11 +28,11 @@ cat $1 | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
     #echo $i    
     #netId=$( echo $i | awk '{ print $2 }' )
     totalNodes=$( echo $i | awk '{ print $1 }' )
-    #echo $netId	
+    #echo $netId
     
     for ((a=1; a <= $totalNodes ; a++))
     do
-    	read line 
+    	read line
 	#echo $line
 	nodeId=$( echo $line | awk '{ print $1 }' )
        	host=$( echo $line | awk '{ print $2 }' )
@@ -42,8 +42,6 @@ cat $1 | sed -e "s/#.*//" | sed -e "/^\s*$/d" |
 	echo $NETID
 	echo $PROGRAM_PATH
 	ssh -o StrictHostKeyChecking=no -l "$NETID" "$host.utdallas.edu" "cd $PROGRAM_PATH;java $PROG $nodeId $1" &
-	
     done
-   
 )
 echo Launch Complete
