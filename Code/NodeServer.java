@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 @SuppressWarnings("serial")
-public class ProjectMain implements Serializable  {
+public class NodeServer implements Serializable  {
 	static String output_file_name;
 	int id;
 	int num_of_nodes, min_per_active, max_per_active, min_send_delay, snapshot_delay, max_number;
@@ -96,13 +96,13 @@ public class ProjectMain implements Serializable  {
 
 	public static void main(String[] args) throws IOException, InterruptedException {
 		//Read the values for all variables from the configuration file
-		ProjectMain obj_main = ConfigParser.readConfigFile(args[1]);
+		NodeServer obj_main = ConfigParser.readConfigFile(args[1]);
 		// Get the node number of the current Node
 		obj_main.id = Integer.parseInt(args[0]);
 		int current_node = obj_main.id;
 		//Get the configuration file from command line
 		//String config_name = args[1];
-		ProjectMain.output_file_name = args[1].substring(0, args[1].lastIndexOf('.'));
+		NodeServer.output_file_name = args[1].substring(0, args[1].lastIndexOf('.'));
 		//Build converge cast spanning tree in the beginning
 		obj_main.buildTree(obj_main.adj_matrix);
 		// Transfer the collection of nodes from ArrayList to hash map which has node id as key since  
@@ -228,10 +228,10 @@ public class ProjectMain implements Serializable  {
 //Server reading objects sent by other clients in the system in a thread 
 class ClientThread extends Thread {
 
-	ProjectMain obj_main;
+	NodeServer obj_main;
 	Socket client_socket;
 
-	public ClientThread(Socket client_socket,ProjectMain obj_main) {
+	public ClientThread(Socket client_socket,NodeServer obj_main) {
 		this.client_socket = client_socket;
 		this.obj_main = obj_main;
 	}
@@ -319,9 +319,9 @@ class ClientThread extends Thread {
 //Thread to start chandy lamport protocol
 class CLThread extends Thread {
 
-	ProjectMain obj_main;
+	NodeServer obj_main;
 
-	public CLThread(ProjectMain obj_main) {
+	public CLThread(NodeServer obj_main) {
 		this.obj_main = obj_main;
 	}
 
@@ -346,9 +346,9 @@ class CLThread extends Thread {
 //Thread to start MAP protocol
 class MAPThread extends Thread {
 
-	ProjectMain obj_main;
+	NodeServer obj_main;
 
-	public MAPThread(ProjectMain obj_main) {
+	public MAPThread(NodeServer obj_main) {
 		this.obj_main = obj_main;
 	}
 

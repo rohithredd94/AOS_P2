@@ -14,7 +14,7 @@
 #
 # Your main project class
 #
-PROG=ProjectMain
+PROG=NodeServer
 NETID=$2
 PROGRAM_PATH=/home/013/r/rx/rxk152130/AOS_P2
 

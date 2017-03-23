@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 public class ChandyLamport {
     //method where protocol starts 
-	public static void startSnapshotProtocol(ProjectMain obj_main) {
+	public static void startSnapshotProtocol(NodeServer obj_main) {
 		synchronized(obj_main){
 			// node 0 calls this method to initiate chandy and lamport protocol
 			//allnodes_state_msg is array which holds the status of receivedStateMessage from all the nodes in the system
@@ -17,7 +17,7 @@ public class ChandyLamport {
 		}
 	}
 
-	public static void sendMarkerMessage(ProjectMain obj_main, int channel_num){
+	public static void sendMarkerMessage(NodeServer obj_main, int channel_num){
 		// Node which receives marker message turns red ,becomes passive and sends
 		// marker messages to all its outgoing channels , starts logging
 		synchronized(obj_main){
@@ -29,16 +29,7 @@ public class ChandyLamport {
 				obj_main.my_state.current_time_stamp = obj_main.current_time_stamp;
 				obj_main.my_state.node_id = obj_main.id;
 				System.out.println("Node "+obj_main.id+" is sending the following timestamp to Node 0");
-//				for(ArrayList<ApplicationMsg> a:obj_main.in_transit_msgs.values()){
-					//System.out.println("******Checking if obj_main has empty channel state:"+a.isEmpty());
-//				}
-//				for(int k:obj_main.my_state.current_time_stamp){
-//					System.out.print(k+" ");
-//				}
-//				synchronized(obj_main.output){
 				obj_main.output.add(obj_main.my_state.current_time_stamp);
-//				}
-//				new writeToOutputThread(obj_main).start();
 				//logging = 1 demands the process to log application messages after it has become red
 				obj_main.logging = 1;
 				//Send marker messages to all its neighbors
@@ -108,7 +99,7 @@ public class ChandyLamport {
 	}
 
 	// This method is called only by node 0
-	public static boolean processStateMessages(ProjectMain obj_main, StateMsg msg) throws InterruptedException {
+	public static boolean processStateMessages(NodeServer obj_main, StateMsg msg) throws InterruptedException {
 		int i=0,j=0,k=0;
 		synchronized(obj_main) {
 			// Check if node 0 has received state message from all the nodes in the graph
@@ -156,7 +147,7 @@ public class ChandyLamport {
 
 	//When logging is enabled save all the application messages sent on each channel
 	//Array list holds the application messages received on each channel
-	public static void logMessage(int channel_num,ApplicationMsg m, ProjectMain obj_main) {
+	public static void logMessage(int channel_num,ApplicationMsg m, NodeServer obj_main) {
 		synchronized(obj_main) {
 			// if the ArrayList is already there just add this message to it 
 			if(!(obj_main.in_transit_msgs.get(channel_num).isEmpty()) && !obj_main.rec_marker.get(channel_num)) {
@@ -173,7 +164,7 @@ public class ChandyLamport {
 
 	// A process received a state msg on its channel and the process is not Node 0
 	// therefore simply forward it over converge cast tree towards Node 0
-	public static void forwardToParent(ProjectMain obj_main, StateMsg state_msg) {
+	public static void forwardToParent(NodeServer obj_main, StateMsg state_msg) {
 		synchronized(obj_main){
 			// Send stateMsg to the parent
 			ObjectOutputStream oos = obj_main.output_stream.get(obj_main.parent);
@@ -186,7 +177,7 @@ public class ChandyLamport {
 	}
 
 	//Method to send finish message to all the neighbors of the current Node
-	public static void sendFinishMsg(ProjectMain obj_main) {
+	public static void sendFinishMsg(NodeServer obj_main) {
 		synchronized(obj_main) {
 			new OutputWriter(obj_main).writeToFile();
 			for(int s : obj_main.neighbors) {
@@ -206,15 +197,15 @@ public class ChandyLamport {
 //Print the output to the output File
 class OutputWriter {
 
-	ProjectMain obj_main;
+	NodeServer obj_main;
 
-	public OutputWriter(ProjectMain obj_main) {
+	public OutputWriter(NodeServer obj_main) {
 		this.obj_main = obj_main;
 	}
 
 
 	public void writeToFile() {
-		String fileName = ProjectMain.output_file_name+"-"+obj_main.id+".out";
+		String fileName = NodeServer.output_file_name+"-"+obj_main.id+".out";
 		synchronized(obj_main.output) {
 			try {
 				File file = new File(fileName);

@@ -5,8 +5,8 @@ import java.io.IOException;
 
 public class ConfigParser {
 
-	public static ProjectMain readConfigFile(String name) throws IOException{
-		ProjectMain mySystem = new ProjectMain();
+	public static NodeServer readConfigFile(String name) throws IOException{
+		NodeServer mySystem = new NodeServer();
 		int count = 0,flag = 0;
 		// Variable to keep track of the current node whose neighbors are being updated
 		int current_node = 0;
@@ -97,14 +97,14 @@ public class ConfigParser {
 		return mySystem;
 	}
 
-	static void insertIntoMatrix(String[] input, ProjectMain mySystem,int current_node) {
+	static void insertIntoMatrix(String[] input, NodeServer mySystem,int current_node) {
 		for(String i:input){
 			mySystem.adj_matrix[current_node][Integer.parseInt(i)] = 1;
 		}
 	}
 
 //	public static void main(String[] args) throws IOException{
-//		ProjectMain m = ConfigParser.readConfigFile("config1.txt");
+//		NodeServer m = ConfigParser.readConfigFile("config1.txt");
 //		for(int i=0;i<m.num_of_nodes;i++){
 //			for(int j=0;j<m.num_of_nodes;j++){
 //				System.out.print(m.adj_matrix[i][j]+"  ");

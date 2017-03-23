@@ -14,7 +14,7 @@
 #
 # Your main project class
 #
-PROG=ProjectMain
+PROG=NodeServer
 NETID=$2
 PROGRAM_PATH=/home/011/p/px/pxv162030/Projects/AOS/Project2/ClassFiles
 
