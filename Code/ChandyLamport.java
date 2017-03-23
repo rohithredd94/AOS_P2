@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-
 public class ChandyLamport {
     //method where protocol starts 
 	public static void startSnapshotProtocol(ProjectMain obj_main) {
@@ -66,7 +65,7 @@ public class ChandyLamport {
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					obj_main.initialize(obj_main);
+					obj_main.initialize();
 				}
 			}
 			//If color of the process is red and a marker message is received on this channel
@@ -87,15 +86,15 @@ public class ChandyLamport {
 					obj_main.my_state.in_transit_msgs = obj_main.in_transit_msgs;
 					obj_main.is_blue = true;
 					obj_main.logging = 0;
-					// Send channel state to parent 
-					ObjectOutputStream oos = obj_main.output_stream.get(obj_main.id);
-					System.out.println("Sending State Msg  by  "+obj_main.id+" and process state is  "+obj_main.my_state.active);
+					// Send channel state to parent
+					ObjectOutputStream oos = obj_main.output_stream.get(obj_main.parent);
+					System.out.println("Sending State Msg  by "+obj_main.id+" and process state is "+obj_main.my_state.active);
 					try {
 						oos.writeObject(obj_main.my_state);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}
-					obj_main.initialize(obj_main);
+					obj_main.initialize();
 				}
 				if(i == obj_main.neighbors.length &&  obj_main.id == 0) {
 					System.out.println("For node 0, all neighbours have sent marker messages.");
@@ -232,7 +231,7 @@ class OutputWriter {
 				// Always close files.
 				buffered_writer.close();
 			} catch(IOException e) {
-				e.printStackTrace()
+				e.printStackTrace();
 			}
 		}
 	}

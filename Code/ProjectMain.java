@@ -47,7 +47,7 @@ public class ProjectMain implements Serializable  {
 	ArrayList<int[]> output = new ArrayList<int[]>();
 
 	//Re-initialize everything that is needed for Chandy Lamport protocol before restarting it
-	public void initialize(){
+	public void initialize() {
 		this.in_transit_msgs = new HashMap<Integer,ArrayList<ApplicationMsg>>();
 		this.rec_marker = new HashMap<Integer,Boolean>();
 		this.state_messages = new HashMap<Integer,StateMsg>();	
@@ -283,7 +283,7 @@ class ClientThread extends Thread {
 								//System.out.println("State messages are received at node 0");
 								boolean restart_cl = ChandyLamport.processStateMessages(obj_main,((StateMsg)msg));
 								if(restart_cl) {
-									obj_main.initialize(obj_main);
+									obj_main.initialize();
 									new CLThread(obj_main).start();	
 								}								
 							}
